@@ -1,0 +1,110 @@
+version: '3.9'
+
+services:
+  # database definitions
+  student-joke-microservice-database:
+    image: mysql
+    restart: always
+
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_ROOT_PASSWORD: Koodaus1
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: Koodaus1
+      MYSQL_DATABASE: joke_microservice_db
+
+    networks: 
+      - student-joke-microservice-network
+
+    # to be able to connect the db outside
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - student-joke-microservice-mysql-data:/var/lib/mysql
+
+  student-joke-microservice:
+    # builds image from src - removes sources and starts 'npm run prod'
+    build: ./joke-microservice
+
+    # use these if you want to run the container without a real program
+    stdin_open: true
+    tty: true
+
+    environment:
+      RUN_IN_CONTAINER: "YES"
+
+    networks: 
+      - student-joke-microservice-network
+    volumes:
+      - ./joke-microservice:/usr/src/app-src
+    ports:
+      # not really needed, but for debugging purposes
+      - "3001:3001"
+
+  student-joke-userservice:
+    # builds image from src - removes sources and starts 'npm run prod'
+    build: ./joke-userservice
+
+    # use these if you want to run the container without a real program
+    stdin_open: true
+    tty: true
+
+    environment:
+      RUN_IN_CONTAINER: "YES"
+
+    networks: 
+      - student-joke-microservice-network
+    volumes:
+      - ./joke-userservice:/usr/src/app-src
+    ports:
+      # not really needed, but for debugging purposes
+      - "3002:3002"
+
+  student-joke-logservice:
+    # builds image from src - removes sources and starts 'npm run prod'
+    build: ./joke-logservice
+
+    # use these if you want to run the container without a real program
+    stdin_open: true
+    tty: true
+
+    environment:
+      RUN_IN_CONTAINER: "YES"
+
+    networks: 
+      - student-joke-microservice-network
+    volumes:
+      - ./joke-logservice:/usr/src/app-src
+    ports:
+      # not really needed, but for debugging purposes
+      - "3003:3003"
+
+  student-joke-microservice-api:
+    build: ./joke-microservice-api
+
+    # use these if you want to run the container without a real program
+    stdin_open: true
+    tty: true
+
+    environment:
+      RUN_IN_CONTAINER: "YES"
+
+    networks: 
+      - student-joke-microservice-network
+    volumes:
+      - ./joke-microservice-api:/usr/src/app-src
+
+    ports:
+      - "3000:3000"
+    # depends_on:
+    #   - joke-microservice
+    restart: on-failure
+
+
+
+volumes:
+  student-joke-microservice-mysql-data:
+
+networks: 
+  student-joke-microservice-network:
